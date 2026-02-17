@@ -1,0 +1,407 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{parskip}
+\usepackage{caption}
+\usepackage{tikz}
+\usepackage[justification=centering]{caption}
+\geometry{margin=1in}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+%================ TITLE PAGE ===================
+
+\begin{titlepage}
+    \centering
+    \vspace*{1in}
+    \Huge
+    \textbf{VLSI Laboratory (EC39004)}\\
+    \LARGE
+    IIT Kharagpur \\
+    \vspace{1cm}
+    \Large
+    \textbf{Experiment 3: Simulation, Sizing and Characterization of CMOS Logic Gates, Latches and Flip-Flops}\\
+    \vspace{1cm}
+    \normalsize
+    \textbf{Name:} Ninaad Desai, Rishith Susarla\\
+    \textbf{Roll No.:} 23EC30030, 23EC10068\\
+    \textbf{Group No:} 3\\
+    \textbf{Date of submission: 01-02-2026} \\
+    \vfill
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{kgp_logo.png}
+    \end{figure}
+\end{titlepage}
+
+ 
+\section*{Introduction}
+CMOS technology is widely used in modern digital systems due to its lower power consumption and reliable switching behavior. In this experiment, basic CMOS logic gates such as NAND and NOR are designed and simulated using 180 nm technology, with emphasis on ensuring that their worst-case voltage transfer characteristics pass through (Vdd/2, Vdd/2) for balanced operation. The effect of transistor sizing, stacking, and body bias is studied by observing the rise and fall times when the gates drive a fanout of three identical gates.
+\\ The experiment is further extended to sequential circuits by implementing JK latches and a D Flip-Flop, where important timing parameters such as clock-to-output and data-to-output delays, along with setup and hold times, are analyzed using transistor-level simulations in the Cadence environment.
+
+\section*{Objectives}
+\begin{enumerate}[leftmargin=*, label=\alph*)]
+    \item Design and simulate smallest possible 2-input and 3-input NAND gates in
+180 nm CMOS technology with their worst case input-to-output transfer
+characteristic curve goes through (Vdd/2, Vdd/2) point (i.e., Inverting point
+is Vdd/2). Simulate and observe their worst case rise and fall time with fanout load of 3 (i.e. driving three gates identical to itself) and driven by a gate
+identical to itself.
+    \item Design and simulate smallest possible 2-input and 3-input NOR gates in 180
+nm CMOS technology with their worst-case input-to-output transfer
+characteristic curve goes through (Vdd/2, Vdd/2) point (i.e., Inverting point
+is Vdd/2). Simulate and observe their worst case rise and fall time with fanout load of 3 (i.e. driving three gates identical to itself) and driven by a gate
+identical to itself.
+    \item Design and simulate JK-Latch using NAND gates (designed in part (a)) and
+NOR gates (designed in part (b)). Observe Data-to-Out and Clock-to-Out
+delays
+    \item Design and simulate a D-Flip-Flop using NAND gates based JK-Latch
+(designed in part (c)). Observe Setup time and hold time of the Flip-Flop.
+
+\end{enumerate}
+
+\section*{Theory}
+\subsection*{CMOS Logic Gates}
+
+Complementary Metal–Oxide–Semiconductor (CMOS) logic uses a combination of PMOS and NMOS transistors to implement digital logic functions. In a CMOS gate, the pull-up network (PMOS) and pull-down network (NMOS) are arranged such that only one network conducts in the steady state, resulting in negligible static power dissipation. This makes CMOS the preferred technology for modern digital integrated circuits.
+
+\subsection*{Voltage Transfer Characteristics (VTC)}
+
+The voltage transfer characteristic (VTC) describes the relationship between the input voltage and output voltage of a logic gate. A desirable design condition is achieved when the switching point lies close to Vdd/2, as this provides balanced noise margins for logic HIGH and logic LOW levels.
+
+\subsection*{NAND and NOR Gates in CMOS}
+In a CMOS NAND gate, NMOS transistors are connected in series while PMOS transistors are connected in parallel. The worst-case condition occurs when only one NMOS transistor switches while the others remain ON, increasing effective resistance in the pull-down path.
+
+In contrast, a CMOS NOR gate consists of PMOS transistors in series and NMOS transistors in parallel. Here, the worst-case switching behavior is dominated by the PMOS network due to increased resistance caused by series-connected PMOS devices and body bias effects.
+
+By adjusting the PMOS-to-NMOS width ratio, the switching threshold of both NAND and NOR gates can be tuned such that the worst-case VTC passes through Vdd/2.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nand_nor_cmos.png}
+    \caption{CMOS implementation of NAND and NOR gates}
+\end{figure}
+
+\subsection*{JK Latch Operation}
+
+A JK latch is a level-sensitive sequential circuit derived from the SR latch, with feedback paths that eliminate the invalid input condition. When implemented using NAND or NOR gates, the latch stores its previous state depending on the clock and input values.
+
+For J=K=1, the latch exhibits toggling behavior, which may lead to oscillations when the clock is held active. Important timing parameters for the JK latch include clock-to-output (Clk-to-Q) delay and data-to-output (Input-to-Q) delay, which are measured using transient analysis.
+
+\subsection*{D Flip-Flop}
+A D Flip-Flop is obtained by modifying the JK latch such that the output follows the input only at a specific clock edge. In this experiment, a master–slave configuration is used, where one latch is active during the positive clock level and the other during the negative clock level, resulting in edge-triggered operation.
+
+The timing behavior of the D Flip-Flop is analyzed by observing its response to input data and clock transitions, ensuring correct synchronization and stable operation.
+
+\section*{Design Steps}
+\subsection*{Part A}
+\begin{enumerate}
+\item Connect the NMOS transistors in series to form the pull-down network and the PMOS transistors in parallel to form the pull-up network. Label the input terminals as $A$ and $B$, and the output terminal as $Y$.
+
+\item Short the input terminals $A$ and $B$ and apply a DC sweep from 0\,V to $V_{DD}$ (1.8\,V). Plot the output voltage versus input voltage using ADE L.
+
+\item Adjust the widths $W_p$ and $W_n$ iteratively such that the switching threshold (inverting point) of the VTC passes through $(V_{DD}/2, V_{DD}/2)$.
+
+\item To verify other worst-case input conditions, sweep one input while keeping the other input fixed at logic HIGH (1.8\,V). Adjust the widths similar to the previous step.
+
+\item Save the schematic with the optimized transistor dimensions. Create a symbol view for the optimized 2-input NAND gate.
+
+\item Repeat the above procedure to design a 3-input NAND gate. Short all three inputs to obtain the worst-case VTC and resize the NMOS and PMOS devices such that the inverting point lies at $V_{DD}/2$.
+
+\item Instantiate one NAND gate as the driver and connect its output to three identical NAND gates to model a fanout of 3. Ensure that the driven gates are identical in sizing to the driver.
+
+\item Apply a pulse input using a \textit{vpulse} source with appropriate rise and fall times. Perform transient analysis and plot the output waveform.
+
+\item Measure the rise time and fall time of the output using 10\%–90\% voltage levels. If required, fine-tune $W_p$ and $W_n$ to balance the rise and fall times under fanout loading.
+
+    
+\end{enumerate}
+
+\subsection*{Part B}
+\begin{enumerate}
+\item Connect the PMOS transistors in series to form the pull-up network and the NMOS transistors in parallel to form the pull-down network. Label the inputs as $A$ and $B$, and the output as $Y$.
+
+\item Short inputs $A$ and $B$ and perform a DC sweep of the input voltage from 0\,V to $V_{DD}$ (1.8\,V). Plot the VTC using ADE L.
+
+\item Resize the PMOS and NMOS transistor widths such that the switching threshold lies at $(V_{DD}/2, V_{DD}/2)$.
+
+\item Sweep one input while keeping the other input fixed at logic LOW (0\,V) to observe alternative worst-case conditions. Verify that the inverter threshold remains close to $V_{DD}/2$.
+
+\item Save the optimized schematic and create a symbol view for the 2-input NOR gate.
+
+\item Repeat the above procedure for a 3-input NOR gate. Short all three inputs to extract the worst-case VTC and resize the PMOS network to compensate for increased series resistance.
+
+\item Connect one NOR gate as the driver and load it with three identical NOR gates to model a fanout of 3.
+
+\item Apply a pulse input using a \textit{vpulse} source and run transient simulations. Plot the output waveform along with the input.
+
+\item Measure the rise time and fall time of the output.
+
+\end{enumerate}
+
+\subsection*{Part C}
+\begin{enumerate}
+    \item Create a cellview of the previously designed 2-input and 3-input NAND gates. Before saving the cellview, make sure that the values of $w_p$ and $w_n$ are set to be the optimal values for ideal inversion ($V_T = V_{dd}/2$). The optima could vary for 2-input and 3-input gates.
+    \item Create a new schematic file for the JK latch.
+    \item Instantiate two 2-input NAND gates for creating the latching feedback path, with the output of one gate connected to one of the inputs of the other, with the remaining input being exposed. Label the output pins as $Q$ and $\overline{Q}$.
+    \item Instantiate two 3-input NOR gates such that its outputs drive the unconnected inputs of the 2-input NAND gates. Short one input of each and connect it to the clock input $CLK$. Connect $\overline{Q}$ to the gate feeding the gate whose input is $Q$. Create a similar feedback connection for the other gates. Expose the remaining inputs as data input $J$ and $K$
+    \item To observe the clock-to-output delay, the data inputs must be kept constant. However, they cannot take on values: (1) JK = 11, (2) JK = 00. Case (2) is trivial as the latch is always in the memory state, irrespective of whether the clock has triggered it or no. In case (1), when the latch is triggered ($CLK = HIGH (1.8V)$), the outputs start oscillating unpredictably, without control, which is undesirable for measuring delays.
+    \item Fix JK = 10. For predictable observations, use the ADE L Simulation tools to set an initial condition to the nodes $Q$ and $\overline{Q}$, to be 0 and 1 respectively. The exact inversion of all the bits gives us the other testing configuration.
+    \item Set the clock period to be equal to the transient simulation time such that the rising edge aligns at the center. Parameterize the rise time. Make use of \textit{vpulse} for generating the desired clock and data waveforms.
+    \item Use ADE L to plot the output waveform of $Q$, $\overline{Q}$ and $CLK$. Use markers to depict the delay.
+    \item Use the Calculator tool and its delay function to calculate the difference between the 50\% threshold points of the clock and output edges.
+    \item To observe data-to-output delays, first set one of the inputs to constant logic LOW (0V). Keep the latch always triggered, i.e. set clock to be HIGH (1.8V). Switch the other data input and observe the delay in the output using a similar procedure as that of the clock. Make sure that the initial output state of the latch and the input are complementary to observe any change.
+\end{enumerate}
+\subsection*{Part D}
+\begin{enumerate}
+\item Create a cellview from the previously designed JK latch.
+    \item Create two instances of the latch and connect the outputs of the first (master) to the input terminals of the second (slave).
+    \item Use the inverter designed in experiment (1) and instantiate its cell view. Expose an input pin $CLK$ and connect it to the clock input of the master latch, while also inverting it with the NOT gate and connecting the inverted clock to the clock input of the slave latch.
+    \item Connect another NOT gate instance between the J and K inputs of the master latch, with K being the output of the inverter. Expose the data input pin $D$ and connect it to the input J of the master latch.
+    \item To analyze the setup time characteristics of the D flip-flop, consider a setup where the clock input toggles at a fixed instance in the transient simulation while the data input bit flips at an instance just before the triggering negative edge of the clock, separated by a parameterized interval $d$. This can be achieved by adjusting delays, rise and fall times of the \textit{vpulse} input to the clock and data pins.
+    \item Just like in part C, parameterize the initial states of master output and slave output for getting easily noticeable changes. Click on \textit{Simulations} > \textit{Convergence Aids} > \textit{Initial Conditions} to set the same for various nodes in the schematic.
+    \item Use \textit{ADE L} to configure a transient analysis, with outputs being all the input and output waveforms. Set the values for all the design parameters.
+    \item Observe the output bit $Q$. Vary the separation between the data edge and negative edge of the clock in a binary-search manner, i.e. observe the output when data switches exactly at the clock edge and some instance before it. If the output logic is correct in the second case, repeat the procedure by moving towards the case causing the setup violation (wrong output LOGIC) and divide the step-size in each iteration. Stop the procedure when a small interval is obtained (around 1-10 ps) between the opposite output logic cases.
+\end{enumerate}
+\section*{Schematics and Waveforms}
+\subsection*{Part-A}
+\subsubsection*{2-input NAND Gate}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nand2_AH_sch.jpg}
+    \caption{CMOS 2-input NAND Gate Schematic}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nand2_short_vtc.jpg}
+    \caption{VTC curve of 2-input NAND gate with terminals A and B shorted and swept}
+\end{figure}
+The values of Wp and Wn obtained for optimizing the VTC curve with terminals A and B shorted were 255nm and 220nm.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nand2_BH_vtc.jpg}
+    \caption{VTC curve of 2-input NAND gate with terminal A swept and B set to high}
+\end{figure}
+The values of Wp and Wn obtained for optimizing the VTC curve with terminals A swept and B grounded were 950nm and 220nm.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nand2_fin1fout3_sch.jpg}
+    \caption{2-input NAND gate with FAN\_IN=1 and FAN\_OUT=3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nand2_fin1fout3_rtft_tuning.png}
+    \caption{Rise-time and Fall-time for FANOUT of 3}
+\end{figure}
+The rise-time and fall-time were found to be approximately equal at 84ps. 
+The Wp and Wn values obtained were 220nm and 245nm. 
+
+\subsubsection*{3-input NAND Gate}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nand3_sch.jpg}
+    \caption{CMOS 3-input NAND Gate Schematic}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nand3_short_vtc.jpg}
+    \caption{VTC curve of 3-input NAND gate with terminals A, B and C shorted and swept}
+\end{figure}
+The values of Wp and Wn obtained for optimizing the VTC curve with terminals A, B and C shorted were 220nm and 635nm.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nand3_fin1fout3_sch.jpg}
+    \caption{3-input NAND gate with FAN\_IN=1 and FAN\_OUT=3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nand3_fin1fout3_rtft_tuning.png}
+    \caption{Rise-time and Fall-time for FANOUT of 3}
+\end{figure}
+The rise-time and fall-time were found to be approximately equal at 131ps. 
+The Wp and Wn values obtained were 220nm and 497.5nm. 
+
+\subsection*{Part-B}
+\subsubsection*{2-input NOR Gate}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/NOR_2/NOR_2_SCHEMATIC.png}
+    \caption{CMOS 2-input NOR Gate Schematic}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/NOR_2/SHORTED_VTC/NOR_2_INPUTS_SHORTED_VTC.png}
+    \caption{VTC curve of 2-input NOR gate with terminals A and B shorted and swept}
+\end{figure}
+The values of Wp and Wn obtained for optimizing the VTC curve with terminals A and B shorted were 3.6um and 0.22um.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/NOR_2/ONE_INPUT/ONE_INPUT_REG_VTC.png}
+    \caption{VTC curve of 2-input NOR gate with terminal A swept and B grounded}
+\end{figure}
+The values of Wp and Wn obtained for optimizing the VTC curve with terminals A swept and B grounded were 1.28um and 0.22um.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nor2_finfout_sch.png}
+    \caption{2-input NOR gate with FAN\_IN=1 and FAN\_OUT=3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/NOR_2/SHORTED_VTC/SHORTED_FANOUT3_RISE_FALL.png}
+    \caption{Rise-time and Fall-time for FANOUT of 3}
+\end{figure}
+The rise-time and fall-time were found to be approximately equal at 225ps. 
+The Wp and Wn values obtained were 1.31um and 0.22um. 
+
+\subsubsection*{3-input NOR Gate}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/NOR_3/nor3_sch.png}
+    \caption{CMOS 3-input NOR Gate Schematic}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/NOR_3/SHORTED/NOR_3_SHORTED_VTC.png}
+    \caption{VTC curve of 3-input NOR gate with terminals A, B and C shorted and swept}
+\end{figure}
+The values of Wp and Wn obtained for optimizing the VTC curve with terminals A and B shorted were 8.1um and 0.22um.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/NOR_3/NOT_SHORTED/NOR_3_ONE_INPUT_VTC.png}
+    \caption{VTC curve of 3-input NAND gate with terminal A swept and B,C grounded}
+\end{figure}
+The values of Wp and Wn obtained for optimizing the VTC curve with terminals A swept and B grounded were 1.25um and 0.22um.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nor3_finfout_sch.png}
+    \caption{3-input NOR gate with FAN\_IN=1 and FAN\_OUT=3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/NOR_3/SHORTED/NOR_3_SHORTED_FANOUT_RISE_FALL.png}
+    \caption{Rise-time and Fall-time for FANOUT of 3}
+\end{figure}
+The rise-time and fall-time were found to be approximately equal at 452ps. 
+The Wp and Wn values obtained were 6.5um and 0.22um. 
+
+\subsection*{Part-C}
+\subsubsection*{JK Latch using NAND Gates}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/jklt_nand_sch.jpg}
+    \caption{Schematic of JK Latch using NAND gates}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/jklt_nand_jk_01_clk_to_out_plot.png}
+    \caption{CLK to Q delay}
+\end{figure}
+The observed CLK to Q delay was around 65 ps or 150 ps (depending on the initial condition). 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/jklt_nand_jk_01_clk_to_out_vals.png}
+    \caption{Calculated clock-to-output delay for a NAND-only JK Latch}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/jklt_nand_jtoq_plot.png}
+    \caption{Data-In (J) to Q delay}
+\end{figure}
+The observed DIN to Q delay (for barying J) was also around 65 ps or 155 ps. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/jklt_nand_jtoq_vals.png}
+    \caption{Calculated clock-to-output delay for a NAND-only JK Latch}
+\end{figure}
+
+\subsubsection*{JK Latch using NOR Gates}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/JK_LATCH_NOR/JK_NOR_schm1.png}
+    \caption{Schematic of JK Latch using NOR gates (1)}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/JK_LATCH_NOR/JK_NOR_schm2.png}
+    \caption{Schematic of JK Latch using NOR gates (2)}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/JK_LATCH_NOR/JK_LATCH_NOT_CLKQ.png}
+    \caption{CLK to Q delay}
+\end{figure}
+The observed CLK to Q delay was 0.1902ns. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3_NOR/JK_LATCH_NOR/JK_LATCH_NOR_CLK_DIN.png}
+    \caption{DIN to Q delay}
+\end{figure}
+The observed DIN to Q delay was 0.2357ns. 
+
+\subsection*{D Flip-flop using NAND-only JK-latch}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/dff_sch.png}
+    \caption{Circuit Schematic of a Master-Slave JK Flip-flop configured as a D Flip-flop}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/dff_stvio_0.png}
+    \caption{Setup Time Violation of the D Flip-flop with initially Q being logic LOW}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/dff_stvio_1.png}
+    \caption{Setup Time Violation of the D Flip-flop with initially Q being logic HIGH}
+\end{figure}
+From the above two graphs, it can be inferred that the setup time for the designed D flip-flop is around 90 - 110 ps.
+\section*{Discussion and Conclusion}
+\subsection*{Discussion by Ninaad Desai (23EC30030)}
+In this experiment, we implemented the universal gates, NOR and NAND, from the transistor-level and optimized it based on rise- and fall-time and ideal VTCs. We then moved to the next layer of abstraction, which is that of gate-level design, where we utilized the developed NOR and NAND gates to design and analyze the JK latch. The JK latches were further used to synthesize a D flip-flop using the master-slave configuration.
+
+The VTC characteristic of the 2-input NAND gate was obtained for three cases: (i) with both inputs (ii) with A = logic HIGH, varying B (iii) with B = logic HIGH, varying A. We had initially expected cases (ii) and (iii) to be symmetric. However, we observed different inverting points $V_T$ for the same PMOS and NMOS widths $w_p$ and $w_n$. An explanation to this discpancy could be that the fixed input causes the corresponding PMOS and NMOS transistors to behave effectively like resistors and capacitors. While the inert PMOS connected to the constant input 1, can be seen as the other PMOS transistor as a parallel resistor and a capacitor, the active NMOS transistor sees some series resistance and capacitance from the inert one. While in both cases (ii) and (iii), the PMOS effective impedence remains symmetric while the the NMOS effective impedence either directly affects the output node or it acts as a source impedance for the other transistor. This causes the asymmetry in observations.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp3/nd_discussion.jpeg}
+\end{figure}
+
+While determining the data-to-output and clock-to-output delays for the JK latch, we noticed that the delay values varied based on the rise time of the corresponding input variable, the clock or the data line. This should not be the case, unless the rise time is comparable or even larger than the delay itself. If the latter is true, then the obtained delay value cannot be considered as the true delay. However, parameterizing the clock and data rise-time allowed us to observe the changes in the calculated delays. One decreasing the rise time by orders of magnitude, the delay decreased but at a slower rate, eventually converging to a single value. This was achieved by setting the rise time to 1 as (attosecond, $10^{-18}$ seconds), which is negligible compared to the clock period or even the delays, which was around a 100 ps (picoseconds, $10^{-12}$ seconds). Another observation to be made is the asymmetric delay between the same input and outputs Q and Q'. This is most likely due to a minute timing ambiguity, wherein we don't know if Q' triggered Q or the other way around.
+
+The two graphs on the setup violation for the D flip-flop shows that unchanged inputs in both the cases of different initial conditions. If the D input switches from logic 1 to 0 before the clock edge, the correct output logic must be 0. Upon using the binary search method, we reached the given interval of around 93.8 ps before the clock edge where the output either switched to 1 or remained zero, depending upon its previous state, which is incorrect behaviour for the flip-flop. When triggered, a D flip-flop must change its previous state to the value of input bit D, which was occuring only for some input cases, indicating unpredictable behaviour caused by setup-time violations. However, such changes were really hard to detect in the case of hold-time violations. When D changed from logic 1 to 0 after the clock edge, we always noticed the output Q to be logic 1 and it never changed. Moreover, without simulating noise, it was impossible to observe metastability during these violations.
+
+\subsection*{Discussion by Rishith Susarla (23EC10068)}
+This experiment involved the transistor-level design and characterization of CMOS logic gates and sequential circuits using 180 nm technology. The main aim was to understand how practical factors such as transistor sizing, device stacking, and capacitive loading influence the behavior of CMOS digital circuits.
+
+From the voltage transfer characteristic (VTC) plots of the NAND and NOR gates, it was seen that placing the switching threshold close to Vdd/2 required careful tuning of the PMOS-to-NMOS width ratio. The imbalance in sizing is due to the lower carrier mobility of PMOS devices compared to NMOS devices. Consequently, PMOS transistors need to be made wider to achieve comparable drive strength and maintain balanced noise margins.
+
+As the gate fan-in increased from two to three inputs, a clear degradation in performance was observed. In the case of NAND gates, the series-connected NMOS transistors increased the effective pull-down resistance, resulting in slower falling transitions and the need for wider NMOS devices. Similarly, for NOR gates, the series-connected PMOS network significantly weakened the pull-up path, requiring substantially larger PMOS widths to restore acceptable switching behavior.
+
+This effect was particularly pronounced in the NOR gates, where the required PMOS widths were much larger than those in the corresponding NAND gates. Hence, NOR gates tend to be slower and more area-intensive in CMOS implementations, which explains why NAND gates are more commonly preferred as basic building blocks in standard-cell libraries.
+
+The implementation of the JK latch and D flip-flop further highlighted the impact of internal feedback and clocked operation on circuit delays. The measured clock-to-Q and data-to-Q delays was due to signal propagation through multiple logic stages, as well as the charging and discharging of internal node capacitances.
+
+
+
+\end{document}

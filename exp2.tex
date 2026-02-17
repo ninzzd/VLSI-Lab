@@ -1,0 +1,159 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{parskip}
+\usepackage{caption}
+\usepackage{tikz}
+\usepackage[justification=centering]{caption}
+\geometry{margin=1in}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+%================ TITLE PAGE ===================
+
+\begin{titlepage}
+    \centering
+    \vspace*{1in}
+    \Huge
+    \textbf{VLSI Laboratory (EC39004)}\\
+    \LARGE
+    IIT Kharagpur \\
+    \vspace{1cm}
+    \Large
+    \textbf{Experiment 2: Simulation and Characterization of a 7-Stage Ring Oscillator}\\
+    \vspace{1cm}
+    \normalsize
+    \textbf{Name:} Ninaad Desai, Rishith Susarla\\
+    \textbf{Roll No.:} 23EC30030, 23EC10068\\
+    \textbf{Group No:} 3\\
+    \textbf{Date of submission: 18-01-2026} \\
+    \vfill
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{kgp_logo.png}
+    \end{figure}
+\end{titlepage}
+
+ 
+\section*{Introduction}
+In the previous experiment, we designed an optimal CMOS inverter with its inverting point at $\frac{V_{dd}}{2}$. The input-to-output characteristics and transient analysis showed the non-zero rise and fall times of the output voltage of such an inverter. These rise and fall times account for the propagation delay of the inverter gate.
+
+In this experiment, we exploit this non-zero propagation delay of an optimum CMOS inverter and its switching characteristics to design a ring oscillator by connecting 7 CMOS inverters in series and in a loop.
+
+\section*{Objectives}
+\begin{enumerate}[leftmargin=*, label=\alph*)]
+    \item Construct a 7-stage ring oscillator using the optimum inverter obtained in experiment 1.
+    \item Observe the oscillation period and calculate the delay per stage
+\end{enumerate}
+
+\section*{Theory}
+\subsection*{Ring Oscillator}
+
+A ring oscillator is a simple circuit used to generate periodic waveforms and to characterize the delay of digital logic gates. It consists of an odd number of inverting stages connected in a closed loop. Due to the odd number of inversions, the circuit cannot reach a stable logic state and instead oscillates between logic high and logic low.
+
+\subsection*{Operation of Ring Oscillator}
+
+In a ring oscillator, a transition at the output of one inverter propagates through the subsequent inverters in the loop. After passing through all stages, the inverted signal is fed back to the input of the first inverter, causing the output to switch again. This continuous propagation of transitions results in sustained oscillations.
+
+For oscillation to occur, the loop must satisfy the condition of having an odd number of inversions and sufficient gain to overcome losses. The frequency of oscillation is determined primarily by the propagation delay of the individual inverter stages.
+
+\subsection*{Oscillation Period and Delay}
+
+For a ring oscillator consisting of $N$ identical inverter stages, the oscillation period $T$ is given by:
+\[
+T = 2N \, t_p
+\]
+where $t_p$ is the average propagation delay of a single inverter stage. The factor of 2 accounts for the time required for both a rising and a falling transition to propagate through the entire loop.
+
+Thus, the delay per stage can be calculated as:
+\[
+t_p = \frac{T}{2N}
+\]
+
+\subsection*{Significance of Using an Optimum Inverter}
+
+In this experiment, the ring oscillator is constructed using the optimum CMOS inverter obtained from Experiment 1. Since the inverter has nearly equal rise and fall times and a switching threshold close to $V_{DD}/2$, it provides balanced propagation delays for both transitions. This leads to a more accurate estimation of the intrinsic delay of the inverter and improves the reliability of the measured oscillation frequency.
+
+\section*{Procedure}
+\subsection*{7-Stage Ring Oscillator}
+\begin{enumerate}
+    \item Create a new cell view to implement the schematic of the 7-stage ring oscillator.
+\item Instantiate seven CMOS inverters using the transistor dimensions obtained from the optimum inverter designed in the previous experiment.
+\item Connect the inverters in cascade, with the output of the seventh inverter fed back to the input of the first inverter to form a closed loop.
+\item Connect a load capacitor of $1\,\text{pF}$ at the output of each CMOS inverter to model capacitive loading.
+\item Initialize the input of the first inverter to $1.8\,\text{V}$ and perform transient analysis to observe sustained oscillations.
+
+\end{enumerate}
+
+\section*{Observations and Results}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp2/ringosc_sch.jpeg}
+    \caption{Schematic Design of a 7-Stage Ring Oscillator}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp2/ringosc_delay.jpeg}
+    \caption{Transient Analysis of Input and Output Voltage Waveforms at an Stage (captures the rise and fall time delays)}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp2/ringosc_period.jpeg}
+    \caption{Transient Analysis of the Voltage Output of the Oscillator (captures the time period of oscillation)}
+\end{figure}
+
+The transient response of the 7-stage ring oscillator was observed using Cadence Virtuoso. 
+The supply voltage was set to $V_{DD} = 1.8\,\text{V}$. 
+The oscillation period was measured by noting consecutive voltage crossings at 
+$V_{DD}/2 = 0.9\,\text{V}$.
+
+The time instants corresponding to two successive rising edge crossings are:
+\[
+t_1 = 62.47\,\text{ns}, \qquad t_2 = 176.27\,\text{ns}
+\]
+
+The oscillation period is given by:
+\[
+T = t_2 - t_1 = 113.79\,\text{ns}
+\]
+
+The oscillation frequency is:
+\[
+f = \frac{1}{T} = 8.79\,\text{MHz}
+\]
+
+For a ring oscillator with $N$ inverter stages, the oscillation period is related to the 
+propagation delay $t_p$ of a single inverter as:
+\[
+T = 2N t_p
+\]
+
+Hence, the average propagation delay per inverter stage is:
+\[
+t_p = \frac{T}{2N} = \frac{113.79}{2 \times 7} = 8.13\,\text{ns}
+\]
+
+The delay measured between two adjacent inverter outputs was found to be approximately 
+$8.81\,\text{ns}$, which closely matches the calculated value, validating the results.
+
+\section*{Discussion and Conclusion}
+\subsection*{Discussion by Ninaad Desai (23EC30030)}
+In this experiment, we utilized the CMOS inverter designed in the previous experiment to realize a 7-stage ring oscillator. In our first attempt at designing the oscillator, we did not include capacitors between each inverter. Moreover, our approach towards achieving a stable oscillation was significantly different. Based on our practical knowledge of oscillators from our Analog Circuits Lab in our 3rd semester, noise contributed by passive components was sufficient to trigger the oscillations. Taking inspiration from this practical observation, we tried running a regular transient analysis but also included noise, with a maximum frequency of 100 MHz, while keeping other parameters equal to their default values. This approach did work, as stable oscillations appeared towards the end of the simulation, with faint noisy signals present in the previous durations. However, the waveforms were irregular, with sharp edges at the voltage maxima and minima. The waveform was more sinusoidal than square. Moreover, the time period was around 1 ns, which seemed to be suspiciously very low. Prior to this, we had tried to generate a singular pulse \(\delta(t)\) to set off the oscillation but we were unable to generate an isolated impulse without periodicity and hence unable to trigger the oscillations. In our second and final approach, we provided an initial condition to the schematic, with one of the lines having a value of logic HIGH ($V = 1.8V$). In addition, we included small shunt capacitors, which significantly smoothened the outputs waveforms, which appeared more square-like with rounded edges between transition regions and stable logic levels. 
+
+% Odd-stage inverter-based ring oscillators are not primarily used for clock generation in digital circuits. This is because of poor phase noise characteristics and high susceptibility to process variations and temperature. This would significantly reduce reproducibility of identical oscillators as the natural frequencies produced would differ and may alter over time. However, their nondeterministic traits make them good candidates for generating random numbers, and they are therefore used in True Random Number Generators (TRNGs), which are safer than Pseudo-Random Number Generators (PRNGs) synthesized from linear feedback shift resistors (LFSRs), in terms of hardware security. Inverter-based ring oscillators are also in digitally controlled delay blocks and testing circuits for comparing simulations to fabricated systems.
+\subsection*{Discussion by Rishith Susarla (23EC10068)}
+In this experiment, we constructed a 7-stage ring oscillator using the optimum CMOS inverter from the previous experiment. The objective was to generate sustained oscillations and quantitatively estimate the delay per stage. We cascaded 7 CMOS inverters and closed the loop. The odd number of inversions allows the oscillations to sustain and not allow the circuit to settle at a stable logic state. 
+
+We carried out transient simulations to observe the time-domain behavior of the oscillator. We added load capacitors at the output of each inverter to stabilize the waveform. The oscillation period was measured by noting successive voltage crossings at 0.9V (Vdd/2). From the measured oscillation period, we calculated the oscillation frequency and the average propagation delay per inverter stage using the theoretical relation, T = 2N*tp. The calculated delay per stage was found to be similar to the delay measured directly between adjacent inverter output, validating the relation. 
+
+Since the oscillation frequency depends on the total delay of all the inverter stages, the ring oscillator gives a straightforward way to estimate the delay of a single inverter when realistic loading is present. While ring oscillators are not suitable for accurate clock generation because their frequency changes with process variations, supply voltage, and temperature, they are still useful for delay measurement and testing purposes. Through this experiment, we were able to clearly see how the delay of individual inverter gates affects the overall behavior of the circuit, showing why ring oscillators are commonly used for delay characterization in VLSI circuits.
+
+
+\end{document}

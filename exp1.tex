@@ -1,0 +1,240 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{parskip}
+\usepackage{caption}
+\usepackage{tikz}
+\usepackage[justification=centering]{caption}
+\geometry{margin=1in}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+%================ TITLE PAGE ===================
+
+\begin{titlepage}
+    \centering
+    \vspace*{1in}
+    \Huge
+    \textbf{VLSI Laboratory (EC39004)}\\
+    \LARGE
+    IIT Kharagpur \\
+    \vspace{1cm}
+    \Large
+    \textbf{Experiment 1: Simulation, Sizing and Characterization of an "Optimum" CMOS Inverter}\\
+    \vspace{1cm}
+    \normalsize
+    \textbf{Name:} Ninaad Desai, Rishith Susarla\\
+    \textbf{Roll No.:} 23EC30030, 23EC10068\\
+    \textbf{Group No:} 3\\
+    \textbf{Date of submission: 18-01-2026} \\
+    \vfill
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{kgp_logo.png}
+    \end{figure}
+\end{titlepage}
+
+ 
+\section*{Introduction}
+Early digital circuits relied on resistive load inverters, where a passive resistor pulled the output high, causing constant static power loss and slow switching. Active load NMOS inverters replaced the resistor with a transistor, improving area and speed, but still consumed static power and suffered from limited noise margins and poor logic levels. The CMOS inverter solved these issues by using complementary NMOS and PMOS devices, ensuring that only one conducts in steady state. This drastically reduced power consumption, improved noise margins, enabled rail to rail outputs, and made scaling practical for modern integrated circuits, across generations of semiconductor technology. 
+
+In this experiment, we designed a CMOS inverter using the Cadence Virtuoso EDA software tool, observed its characteristics and adjusted our design to make it an optimum CMOS inverter.
+
+\section*{Objectives}
+\begin{enumerate}[leftmargin=*, label=\alph*)]
+    \item Design the schematics of three smallest possible inverters in a 180 nm CMOS technology node with \(V_{dd} = 1.8 V\) for the following three cases: 
+    \begin{enumerate}[label=(\roman*)]
+        \item with \(W_p = W_n\)
+        \item with \(W_p = x.W_n\) where is \(x\) is chosen such that the input-to-output DC characteristic curve goes through \((\frac{V_{dd}}{2},\frac{V_{dd}}{2})\), i.e. the inverting-point is \(\frac{V_{dd}}{2}\)
+        \item with \(W_n = x.W_p\)
+    \end{enumerate}
+    \item Simulate the input-to-output DC transfer characteristics for all the sub-parts in part (i)
+    \item Simulate and observe rise and fall times for the inverter in case (ii) with fan-out load of 4, i.e. the inverter being analyzed is driving 4 other identical *and driven by another identical to itself*.
+\end{enumerate}
+
+\section*{Theory}
+The CMOS inverter is the basic unit of digital integrated circuits and is widely used in the design of more complex logic gates and sequential elements. It consists of a complementary pair of MOS transistors: a p-channel MOSFET (PMOS) connected to the supply voltage $V_{DD}$ and an n-channel MOSFET (NMOS) connected to ground. The common gate terminal acts as the input, and the joined drain terminals provide the output.
+
+\subsection*{Operation of CMOS Inverter}
+
+The operation of a CMOS inverter relies on the complementary switching behavior of NMOS and PMOS transistors:
+\begin{itemize}
+    \item When the input voltage $V_{in}$ is low (close to 0 V), the NMOS transistor is OFF and the PMOS transistor is ON, setting the output voltage $V_{out}$ to $V_{DD}$.
+    \item When $V_{in}$ is high (close to $V_{DD}$), the NMOS transistor is ON and the PMOS transistor is OFF, setting $V_{out}$ to ground.
+\end{itemize}
+
+This complementary action results in low static power consumption, since current flows only during switching and not when the input remains at a constant logic level. Additionally, CMOS logic offers sharp switching, ensuring high noise immunity and fast operation.
+
+\subsection*{DC Transfer Characteristic}
+
+The input-to-output DC transfer characteristic (VTC) of a CMOS inverter describes how the output voltage varies with the input voltage under steady-state conditions. The most important point on this curve is the switching threshold or inverter threshold voltage $V_M$, defined as the input voltage for which
+\[
+V_{in} = V_{out} = V_M.
+\]
+
+For a symmetric inverter, the ideal condition is
+\[
+V_M = \frac{V_{DD}}{2},
+\]
+which provides equal noise margins for logic high and logic low levels.
+
+The location of $V_M$ depends on the relative strengths of the NMOS and PMOS transistors, which are governed by their effective drive currents:
+\[
+I_D \propto \mu C_{ox} \frac{W}{L} (V_{GS} - V_T)^2,
+\]
+where $\mu$ is carrier mobility, $C_{ox}$ is the oxide capacitance per unit area, $W$ is transistor width, $L$ is channel length, and $V_T$ is the threshold voltage.
+
+Since electron mobility ($\mu_n$) is higher than hole mobility ($\mu_p$), the PMOS transistor typically requires a larger width than the NMOS transistor to achieve equal drive strength.
+
+\subsection*{Sizing for an Optimum Inverter}
+
+In this experiment, three inverter configurations are considered:
+\begin{enumerate}
+    \item $W_p = W_n$
+    \item $W_p = x W_n$
+    \item $W_n = x W_p$
+\end{enumerate}
+
+The value of the sizing factor $x$ is chosen such that, for case (ii), the inverter threshold voltage lies at $V_{DD}/2$. This sizing ensures balanced pull-up and pull-down strengths, resulting in symmetric voltage transfer characteristics and nearly equal rise and fall times.
+
+\subsection*{Rise Time and Fall Time}
+
+The dynamic performance of a CMOS inverter is characterized by its rise time ($t_r$) and fall time ($t_f$):
+\begin{itemize}
+    \item Rise time is the time taken by the output to transition from 10\% to 90\% of $V_{DD}$.
+    \item Fall time is the time taken by the output to transition from 90\% to 10\% of $V_{DD}$.
+\end{itemize}
+
+These parameters depend on the effective output resistance of the transistors and the load capacitance. In this experiment, the inverter is tested with a fan-out of 4, meaning it drives four identical inverters.
+
+\section*{Procedure}
+\subsection*{Part A}
+\begin{enumerate}
+    \item Create a new library to store all the schematics to be made in the experiment and the following experiments (for example, let it be named \textit{mon\_grp3})
+    \item Attach the library to an existing technology node, such as the 180 nm node, namely \textit{ts018\_scl\_prim}
+    \item In the newly created library, create a new schematic for the CMOS inverter design (let it be named \textit{exp1\_cmos\_inverter})
+    \item Use the \textit{Add Instance} icon to add an NMOS and a PMOS transistor from the library of the chosen technology node of 180 nm.
+    \item Connect the drains of the PMOS and NMOS transistors together. Short the gate terminals of the transistors with a wire.
+    \item Click on \textit{Add Instance} to add a DC voltage supply (named as \textit{vdc} in the \textit{analogLib} library) and connect it to the source of the PMOS transistor. Use the same library to add an instance of a ground terminal (labelled as \textit{gnd}) and connect it to the source of the NMOs transistor.
+    \item Double-click on the transistors to adjust the channel widths of the transistors (\(W_p\) and \(W_n\)), for the three subparts of the experiment (i), (ii) and (iii).
+    \item \textit{Optional:} Add pins to following wires with the corresponding names, to create a block-level abstraction of the design (transition from transistor-level to gate-level design):
+    \begin{itemize}
+        \item Source of PMOS: $V_{dd}$ (input)
+        \item Source of NMOS: $V_{ss}$ (input)
+        \item Shorted gates of both NMOS and PMOS: $V_{in}$ (input)
+        \item Shorted drains of both NMOS and PMOS: $V_{out}$ (output)
+    \end{itemize}
+    Go to: Create $>$ Cellview $>$ From Cellview. Add the pins listed above and save the cellview (for example, as \textit{cmos\_inverter}). Add a traingular shape to the block to make it look like a standard inverter logic gate.
+\end{enumerate}
+
+\subsection*{Part B}
+\begin{enumerate}
+    \item Create an instance of a \textit{vpulse} schematic from \textit{analogLib}, connecting its positive terminal to the shorter gates of NMOS and PMOS. Label this wire as \textit{vin}.
+    \item Label the shorting wires of the drains of NMOS and PMOS, as \textit{vout}.
+    \item Go to: Launch $>$ ADE L $>$ Setup $>$ Model libraries. Add the path to the \textit{ts018\_scl\_prim} library and select the \textit{tt\_18} section to include the transistor models.
+    \item Inside ADE L, click on \textit{Analyses}. Choose the \textit{dc} option under analysis. Select the \textit{Save DC Operating Point} option. Select \textit{component parameter} under sweep variable, and select the vpulse source from the schematic. Set the sweep range (start-stop) to be from $0V$ to $1.8V$ and the sweep type to \textit{automatic}. Lastly, click on \textit{Enabled}, apply the changes and close the window.
+    \item Select \textit{Outputs} in the ADE L window and add the \textit{vin} and \textit{vout} wires as voltage plot outputs.
+    \item Save the schematic and the analyses configurations inside ADE L, and click on \textit{Netlist and Run} to obtain the input-to-output DC transfer characteristics graph.
+    \item Use markers and delta markers to indicate the transition region characteristics of the inverter.
+\end{enumerate}
+
+\subsection*{Part C}
+\begin{enumerate}
+    \item Create a new schematic and add 6 instances of the cellview abstraction of the inverter (the abstraction is chosen for convenience).
+    \item Connect two inverter gates in series, with the second gate being the observed gate and the first being the input driving gate. Connect the observed gate in parallel to the remaining 4 gates. Let the outputs of the loading inverter gates be connected to a capacitor each.
+    Connect the $V_{dd}$ and $V_{ss}$ terminals of all the gates to the voltage supply and ground respectively.
+    \item Instantiate a \textit{vpulse} voltage source at the input of the input driving inverter, and edit its properties as given below:
+    \begin{itemize}
+        \item DC voltage = 0 V
+        \item Rise time = 10 ns
+        \item Fall time = 10 ns
+        \item Period = 100 ns
+        \item Delay = 1 ns
+        \item Low voltage level = 0 V
+        \item High voltage level = 1.8 V
+    \end{itemize}
+    \item Open the ADE L simulation window and choose the transient analysis option (\textit{trans}) in the Analyses window. Set the duration accordingly and add \textit{vin} and \textit{vout} of the observed inverter gate as plot outputs. Run the simulation.
+\end{enumerate}
+\section*{Observations and Results}
+\subsection*{Part A}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp1/exp1a_sch.jpeg}
+    \caption{Schematic Design of a CMOS Inverter}
+\end{figure}
+\subsection*{Part B}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp1/exp1ai.jpg}
+    \caption{Input-to-Output DC Transfer Characteristics of a CMOS inverter with \(W_p = 220 \, nm, \,W_n = 220 \, nm\)}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp1/exp1aii.jpg}
+    \caption{Input-to-Output DC Transfer Characteristics of a CMOS inverter with \(W_p = 1220 \, nm, \,W_n = 220 \, nm\)}
+\end{figure}
+
+The DC transfer characteristic of the CMOS inverter was obtained for 
+$V_{DD} = 1.8\,\text{V}$. 
+The inverter achieves its switching point at $(V_{DD}/2, V_{DD}/2)$ for 
+$W_p = 1220\,\text{nm}$ and $W_n = 220\,\text{nm}$. 
+The resulting width ratio
+\[
+\frac{W_p}{W_n} \approx 5.5
+\]
+closely matches the inverse ratio of hole to electron mobility 
+($\mu_n / \mu_p$), ensuring equal pull-up and pull-down strengths and hence an optimum inverter.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp1/exp1aiii.jpg}
+    \caption{Input-to-Output DC Transfer Characteristics of a CMOS inverter with \(W_p = 220 \, nm, \,W_n = 1220 \, nm\)}
+\end{figure}
+
+The inverting point in the three sub-parts were found to be:
+\[
+    (i) \, V_m \approx 735 mV
+\]
+\[
+    (ii) \, V_m \approx 900 mV
+\]
+\[
+    (iii) \, V_m \approx 632 mV
+\]
+
+\subsection*{Part C}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp1/exp1c_sch.jpeg}
+    \caption{Schematic Design of an Optimum CMOS Inverter with Fan-In=1 and Fan-Out=4}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{exp1/exp1c.jpeg}
+    \caption{Input-to-Output DC Transfer Characteristics of an optimum CMOS inverter with Fan-In=1 and Fan-Out=4}
+\end{figure}
+
+Transient analysis was performed with the inverter driven by an identical inverter and loaded with a fan-out of four identical inverters. 
+The fall time ($t_f$), measured from $90\%$ to $10\%$ of $V_{DD}$, was found to be $218.282\,\text{ps}$, while the rise time ($t_r$), measured from $10\%$ to $90\%$ of $V_{DD}$, was $1.09677\,\text{ns}$. 
+
+\section*{Discussion and Conclusion}
+\subsection*{Discussion by Ninaad Desai (23EC30030)}
+In this experiment, we utilized the Cadence Virtuoso tool for the first time, to design a CMOS inverter and to observe its characteristics when isolated and when loaded at the output and driven at the input terminals by other inverters. 
+
+The chosen technology node was 180 nm, which restricted the channel length to be no lesser than 180 nm. Since we were asked to design the inverter using the smallest possible transistors meeting the given criteria, we fixed the channel length to be 180 nm. For part (a)(i), where \(W_p = W_n\), we tried setting the width to also equal the channel length, i.e. 180 nm. However, the cadence terminal displayed an error stating that the minimum possible width for the given node was 220 nm. The reason for limiting the minimum channel width is that foundries cannot obtain high yields with small channel widths. Most foundries prefer to have larger widths than lengths as narrower widths result in larger process variations across the wafer. Moreover, smaller widths challenge drain and source terminal constrains, which makes very narrow widths physically impossible without modifying gate and terminal constraints. Moreover, the error is not thrown directly by Cadence. It is the result of the device constraints stored in the 180 nm node library, i.e. \textit{ts\_018\_scl\_prim}. Widths can also not be arbitrarily chosen a given technology node has a defined discrete grid resolution. Hence, it is possible that the next smallest and safest width that could be fabricated with this technology, was 220 nm. 
+
+We obtained a ratio of $x \approx 5.54$ for obtaining the an optimal inverter gate, with the inverting point at $V_{dd}/2$. This asymmetry is the consequence of the difference in mobility of electrons and holes. Even in intrinsic silicon, electrons are about 2-3 times more mobile than holes. Moreover, there is an asymmetry in doping in the PMOS and NMOS transistors. The wafer is of p-type, allowing direct fabrication of NMOS transistors while PMOS transistors are formed inside an N-doped well. This further seems to enhance the mobility of electrons in NMOS as compared to that of holes in PMOS.
+
+\subsection*{Discussion by Rishith Susarla (23EC10068)}
+In this experiment, we worked on design, implementation and simulation of CMOS Inverter using Cadence Virtuoso. The primary objective was to understand how transistor sizing affects both the static and dynamic behavior of a CMOS inverter. We designed multiple inverter configurations varying the width ratios of the NMOS and PMOS transistors while keeping the channel length fixed at the minimum allowed value in the tool. Through DC analysis, we obtained the voltage transfer characteristics (input voltage vs output voltage curve) and observed how the switching threshold varies with different sizing choices. The DC transfer characteristics clearly show that equal sizing of NMOS and PMOS transistors does not yield a symmetric curve, as higher electron mobility shifts the switching threshold away, making the pull-down network stronger than the pull-up network. This leads to unequal noise margins for logic high and logic low levels. 
+
+To address this issue, the PMOS width was increased relative to the NMOS width until the inverter switching point coincided with Vdd/2 (0.9V). This adjustment balanced the pull-up and pull-down strengths, resulting in a symmetric voltage transfer characteristic and equalized noise margins. This confirmed theoretical expectation that the optimum inverter operation requires sizing the MOS accordingly to compensate for the differences in carrier mobility. 
+
+We also analyzed the dynamic performance of the optimum inverter using transient simulations. We considered the transient analysis of a configuration where the inverter tested was driven by another identical inverter, with four identical inverters loaded at its output. We calculated the rise time and fall time using the standard definitions (10\% to 90\% and 90\% to 10\% respectively). The results show the rise and fall times were found to be of comparable magnitude showing reasonably balanced charging and discharging. The asymmetry observed can be attributed to the differences in effective resistances in NMOS and PMOS devices and also due to the load capacitance.  
+
+\end{document}

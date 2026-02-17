@@ -1,0 +1,380 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{parskip}
+\usepackage{caption}
+\usepackage{tikz}
+\usepackage[justification=centering]{caption}
+\geometry{margin=1in}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+%================ TITLE PAGE ===================
+
+\begin{titlepage}
+    \centering
+    \vspace*{1in}
+    \Huge
+    \textbf{VLSI Laboratory (EC39004)}\\
+    \LARGE
+    IIT Kharagpur \\
+    \vspace{1cm}
+    \Large
+    \textbf{Experiment 4: Physical Design and Post-Layout Simulation of Inverter and Ring Oscillator}\\
+    \vspace{1cm}
+    \normalsize
+    \textbf{Name:} Ninaad Desai, Rishith Susarla\\
+    \textbf{Roll No.:} 23EC30030, 23EC10068\\
+    \textbf{Group No:} 3\\
+    \textbf{Date of submission: 16-02-2026} \\
+    \vfill
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{kgp_logo.png}
+    \end{figure}
+\end{titlepage}
+
+ 
+\section*{Introduction}
+In VLSI design, schematic design represents the connection of transistors and circuit elements while layout design represents the geometric realization of the circuit on silicon. Layout determines the physical placement of transistors and routing of interconnections using layers such as diffusion, polysilicon, metal, and wells.
+
+The physical implementation introduces parasitic resistances and capacitances that affect circuit performance. Therefore, post-layout verification and simulation are essential to accurately estimate delay and frequency characteristics.
+
+To ensure that a layout is manufacturable and electrically equivalent to the intended schematic, two major verification steps are performed:
+\begin{enumerate}
+    \item \textbf{Design Rule Check (DRC)} verifies that the layout satisfies all fabrication constraints such as minimum width, spacing, and enclosure rules.
+    \item \textbf{Layout Versus Schematic (LVS)} ensures that the physical layout matches the schematic in terms of device sizes and connectivity.
+\end{enumerate}
+
+After successful DRC and LVS verification, \textbf{Parasitic Extraction (PEX)} is performed to generate an extracted netlist that includes parasitic layout-induced resistances and capacitances. This enables post-layout simulation, providing a more accurate estimation of real-world circuit performance.
+
+In this experiment, the objective is to design the physical layout of an optimized CMOS inverter, ensure it is DRC and LVS clean, and study the impact of layout-induced parasitics through post-layout simulation. A ring oscillator built using these inverters is then analyzed to compare pre-layout and post-layout performance, highlighting how physical implementation affects delay and oscillation characteristics.
+
+\section*{Objectives} % Done
+\begin{enumerate}[leftmargin=*, label=\alph*)]
+    \item Layout design of a smallest possible inverter with "equal" rise-to-fall and fall-to-rise time (obtained in Experiment 1).
+    \item Make it DRC (Design Rule Checker) and LVS (Layout vs Schematic Check) clear physical design.
+    \item Construct a ring oscillator (as the schematic obtained in Experiment 5). Run post-layout simulation to obtain delay of the inverter. Compare oscillator output waveforms of pre-layout and post-layout of the oscillator under identical loading condition. 
+\end{enumerate}
+
+\section*{Theory}
+\subsection*{CMOS Inverter Layout}
+A CMOS inverter consists of a PMOS transistor placed in an N-well and an NMOS transistor placed in the p-substrate. The drains of both transistors are connected together to form the output node, while their gates are connected to form the input node.
+
+\subsection*{Design Rule Check (DRC)}
+Design Rule Check (DRC) is a physical verification step that ensures the layout satisfies all fabrication constraints defined by the semiconductor foundry for a given technology node (e.g.- 180 nm). These rules ensure that the circuit can be reliably manufactured.
+
+DRC checks for geometric and physical violations such as: 
+\begin{enumerate}
+    \item \textbf{Minimum Width Rules:} Ensures that the layers like diffusion, polysilicon, and metal are not made thinner than the allowed minimum value
+    \item \textbf{Minimum Spacing Rules:} Verifies that adjacent features maintain sufficient separation to prevent short circuits
+    \item \textbf{Overlap and Enclosure Rules:} Ensures that contacts and vias are properly enclosed by metal or diffusion layers to guarantee reliable electrical connections.
+    \item \textbf{Extension Rules:} Checks that certain layers (e.g.- poly over diffusion) extend beyond required boundaries for proper transistor formation.
+    \item \textbf{Well and Implant Spacing Rules:} Ensures correct separation between wells and active regions to avoid latch-up and leakage issues.
+\end{enumerate}
+Passing DRC confirms that the layout adheres to all the process design rules and is manufacturable without structural defects. Now to verify whether the design is functionally correct, we use LVS.
+
+\subsection*{Layout Versus Schematic (LVS)}
+Layout Versus Schematic (LVS) is an electrical verification step that ensures the physical layout is electrically equivalent to the original schematic design. While DRC verifies manufacturability, LVS verifies functional correctness of the implemented layout.
+
+During LVS, the tool extracts a netlist from the layout by identifying transistors, their dimensions (W/L), and their interconnections. This extracted netlist is then compared with the original schematic netlist. 
+
+LVS checks for matching device types, device count, transistor parameters, correct node connectivity, proper power and ground connections, and correct pin assignments. If mismatches such as missing devices, incorrect sizing, shorts, or open connections are detected, LVS fails.
+
+Passing LVS confirms that the layout is electrically equivalent to the schematic and functionally correct before fabrication. However, LVS does not account for parasitic effects, which are analyzed separately during parasitic extraction and post-layout simulation.
+
+\subsection*{Parasitic Extraction (PEX)}
+Parasitic Extraction (PEX) is a post-layout verification step used to model the non-ideal electrical effects introduced during physical implementation. While schematic simulations assume ideal interconnections, the actual layout introduces additional resistances and capacitances due to the physical geometry of devices and routing.
+
+During layout implementation, parasitic elements arise due to diffusion capacitance, gate overlap capacitance, interconnect and coupling capacitances between metal layers, as well as metal, contact, and via resistances, all of which affect delay and overall circuit performance.
+
+PEX tools analyze the layout geometry and extract an equivalent RC network that models these parasitic resistances and capacitances. This extracted RC network is then added to the circuit netlist, creating an extracted view used for post-layout simulation.
+
+The presence of parasitic resistance ($R$) and capacitance ($C$) increases the effective load seen by each transistor. According to the RC delay model,
+
+\[
+t_{\text{delay}} \approx R_{\text{eq}} \times C_{\text{load}}
+\]
+
+An increase in either resistance or capacitance results in higher propagation delay, slower rise and fall times, and reduced switching speed.
+
+Thus, Parasitic Extraction (PEX) enables realistic performance estimation by accounting for layout-induced parasitic effects that are not captured in pre-layout simulations.
+
+
+\section*{Design Steps}
+\subsection*{Layout Design}
+\subsubsection*{CMOS Inverter}
+    \begin{enumerate}
+        \item Open the schematic of the “optimum” inverter obtained in Experiment 1 and ensure proper pin names (VIN, VOUT, VDD, GND) are defined.
+
+    \item Create a new layout view and open \textbf{Layout XL}.
+
+    \item Set placement grid spacing:
+    \begin{itemize}
+        \item X-spacing = 0.005 $\mu$m (5 nm)
+        \item Y-spacing = 0.005 $\mu$m (5 nm)
+    \end{itemize}
+
+    \item In Layout XL, create instances of NMOS and PMOS devices from the technology library.
+
+    \item Open \textbf{Properties} $\rightarrow$ \textbf{Parameters} and set the transistor widths according to the optimum inverter sizing obtained in Experiment 1. Keep channel length as 180 nm.
+
+    \item In device properties:
+    \begin{itemize}
+        \item Change \textbf{“Internally connect gates”} to \textbf{Top} for NMOS.
+        \item Change \textbf{“Internally connect gates”} to \textbf{Bottom} for PMOS.
+    \end{itemize}
+
+
+    \item Place PMOS inside the N-well region at the top and NMOS at the bottom. Arrange them vertically aligned for compact layout.
+
+    \item Create a path between the NMOS and PMOS gates to form the common input connection.
+
+    \item Connect:
+    \begin{itemize}
+        \item PMOS source to VDD using \textbf{Metal1}
+        \item NMOS source to GND using \textbf{Metal1}
+        \item Drains of PMOS and NMOS together using \textbf{Metal1} to form VOUT
+    \end{itemize}
+
+    \item Create layout pins for VIN, VOUT, VDD and GND using Metal1. Ensure that layout pin names exactly match schematic pin names.
+
+    \item Run DRC and correct any violations.
+
+    \item Run LVS and verify schematic–layout consistency.
+\end{enumerate}
+
+\subsubsection*{7-Stage Ring Oscillator}
+\begin{enumerate}
+    \item Open the schematic of the 7-stage ring oscillator constructed using the optimum inverter.
+
+    \item Ensure proper pin definitions in the schematic (e.g., VDD, GND, and output node if required for observation).
+
+    \item Create a new layout view and open \textbf{Layout XL}.
+
+    \item Set placement grid spacing:
+    \begin{itemize}
+        \item X-spacing = 0.005 $\mu$m (5 nm)
+        \item Y-spacing = 0.005 $\mu$m (5 nm)
+    \end{itemize}
+
+    \item Using \textbf{Create Instance}, instantiate the DRC and LVS clean inverter layout seven times.
+
+    \item Arrange the seven inverter instances in a linear structure.
+
+    \item Connect the output of each inverter to the input of the next inverter.
+
+    \item Connect the output of the seventh inverter back to the input of the first inverter to complete the feedback loop.
+
+    \item Create common VDD and GND rails across all inverter stages using \textbf{Metal1}. Ensure all power pins are properly connected.
+
+    \item Create labels for VDD, GND, and oscillator output using Metal1 label, ensuring consistency with the schematic.
+
+    \item Run DRC and correct any spacing or enclosure violations.
+
+    \item Run LVS and ensure the layout matches the schematic in terms of device count and connectivity.
+
+\end{enumerate}
+\subsection*{DRC}
+\begin{enumerate}
+    \item To run nanometer-DRC (nmDRC), click on Calibre $>$ nmDRC in the Layout XL toolbar. Ensure that the rules files for DRC, LVS and PEX have been installed in the working directory of Cadence Virtuoso before trying to run any of the layout verifications.
+    \item Under the rules section, select the current directory as the work directory (.) and select the SCL rules file for DRC, namely \textit{DRC.header}, installed from the AVLSI website for the rules files.
+    \item Click on on Run DRC.
+    \item Debug the errors shown in the pop-up results window if any exist. In DRC, most errors are related to the spacing of wires and other devices, which may be unsuitable for the technology node. Double click on each error number to get a zoomed-in description of the error in Layout XL.
+    \item Proceed to performing LVS once successful.
+\end{enumerate}
+\subsection*{LVS}
+\begin{enumerate}
+    \item In the Run nmLVS window, under the Rules section, set the work directory to the current directory (.) and select the appropriate SCL LVS rules file (i.e., \textit{LVS.header}) provided from the AVLSI website.
+
+\item Under the Inputs tab, verify that the correct layout cellview and schematic cellview are selected. Ensure that the top cell name matches for both layout and schematic.
+
+\item In the Outputs/Options section, confirm that the report and results database locations are correctly set (default settings are usually sufficient).
+
+\item Click on \textit{Run LVS} to start the LVS process.
+
+\item After completion, review the LVS report in the pop-up results window. Check whether the status shows \textbf{"LVS completed. CORRECT"}. If errors exist (such as unmatched devices, missing connections, parameter mismatches, or shorts/opens), examine the error summary.
+
+\item Use the RVE (Results Viewing Environment) window to debug errors. Double-click on each listed error to highlight and zoom into the corresponding location in Layout XL. Correct issues such as incorrect connections, missing vias, incorrect device parameters (W/L), or improper labeling.
+
+\item Re-run LVS after fixing the errors until the design passes with a clean \textbf{CORRECT} result.
+
+\end{enumerate}
+\subsection*{PEX}
+\begin{enumerate}
+    \item Export the CDL (Circuit Description Language) of the schematic by selecting File $>$ Export $>$ CDL in the main logs window of Cadence Virtuoso, and save the generated file(s) inside any suitable location in the working directory of Virtuoso.
+    \item Before running PEX, ensure that the layout design consists both metallic pins for all the exposed terminals and their text labels for the same metal. Moreover, make sure that the pins exposed in the schematic share the exact same names with the pins in the layout. Otherwise, LVS would fail and so would PEX.
+    \item To run Parasitic Extraction (PEX) for the layout, select Calibre $>$ PEX under the Layout XL toolbar. 
+    \item Under the Rules category, select the \textit{RCX\_4LM.header} file for the rules file and select any suitable run directory. 
+    \item Under the Outputs category, select the ground parameter under PEX Netlist and set the value to be "VSS". Make sure that netlist format has been set as "Spectre". Under the reports section in the same category, select LVS reports and PEX reports and select the "view after run finishes" for both PEX and LVS.
+    \item Under the Database category and under its Library section, select "Additional SPICE Files". Add the \textit{scale.cdl} file downloaded as a part of the SCL rules files compressed folder from the AVLSI lab website, and also add the generated CDL file for the given schematic in Step 1.
+    \item Click on Run PEX. Check the LVS report the appears alongside the PEX output, which shows the lumped parameters of the design. Only a successful LVS would allow us to proceed.
+    \item Make sure to create a cell-view abstraction of the design. Create a copy of the previously created cell-view and rename the copy as \textit{spectre}.
+    \item Select Tools $>$ CDF $>$ Edit in the Virtuoso logs window. Select the library and the particular design. Create a new parameter named "model" and set its type to \textit{string}.
+    \item Under Simulation Information in the CDF window, select \textit{spectre} as the simulation software for the design. Add "model" to otherParameters, let componentName to be the name of the schematic as generated in the netlist generated after PEX. Set the termOrder to be exactly as it is in the generated PEX netlist for the exposed pins.
+    \item Create a new schematic for testing the parasitic effects on the transient behaviour of the circuit. Instantiate the \textit{spectre} cell-view of the corresponding design. Add instances of power supplies \textit{vdc} and pulse generators \textit{vpulse} accordingly.
+    \item Select the ADE L simulator. In its window, select Setup $>$ Model Libraries. Apart from adding the technology node library files, add the PEX-generated netlist as well.
+    \item Select the transient analysis in the Analyses option in the toolbar and set an approprite run duration for the same.
+    \item Select the outputs from the schematic for the analysis.
+    \item Run the analysis and use the calculator and markers to obtain the rise- and fall-time, and the propagation delay.
+\end{enumerate}
+
+
+
+
+\section*{Schematics, Waveforms and Observations}
+\subsection*{CMOS Inverter}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/inv_layout.png}
+    \caption{Layout Design for CMOS Inverter with Symmetric rise-to-fall and fall-to-rise time}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/inv_drc.png}
+    \caption{Passed-DRC Test for CMOS Inverter}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/inv_lvs.png}
+    \caption{Passed-LVS Test for CMOS Inverter}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/inv_pex_report.png}
+    \caption{Report of Successful Parasitic Extraction (PEX) for the CMOS Inverter Layout}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/inv_pex_netlist.png}
+    \caption{Generated Netlist after Parasitic Extraction (PEX) for the CMOS Inverter}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/inv_schematic_pex.png}
+    \caption{Test Schematic for Evaluating Post-Layout Transient Behaviour of a CMOS Inverter}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/inv_ideal_trans.png}
+    \caption{Transient Analysis of a Pre-Layout CMOS Inverter with Propagation Delay}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/inv_ideal_trans_rftf.png}
+    \caption{Rise-Time and Fall-Time Analysis of a Pre-Layout CMOS Inverter}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/inv_delay_pex.png}
+    \caption{Transient Analysis of a Post-Layout CMOS Inverter with Propagation Delay}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/inv_pex_trans_rtft.png}
+    \caption{Rise-Time and Fall-Time Analysis of a Post-Layout CMOS Inverter}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\large
+\begin{tabular}{|l|c|c|c|}
+\hline
+ & Propagation Delay (ps) & Rise-Time (ps) & Fall-Time (ps)\\ \hline
+Pre-Layout  &  58.5 & 137.34 & 137.34  \\ \hline
+Post-Layout & 69.7 & 148.206 & 148.206 \\ \hline
+Delta       & 11.2 & 10.866 & 10.866 \\ \hline
+\end{tabular}
+\caption{Comparison of Pre-Layout and Post-Layout Timing Parameters for the CMOS Inverter}
+\end{table}
+% ------------------------------------------------------
+\subsection*{7-Stage Ring Oscillator}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/ringosc_layout.png}
+    \caption{Layout Design for a 7-Stage Ring Oscillator Made from CMOS Inverters}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/ringosc_drc.png}
+    \caption{Passed-DRC Test for 7-Stage CMOS Inverter-Based Ring Oscillator}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/ringosc_lvs.png}
+    \caption{Passed-LVS Test for 7-Stage CMOS Inverter-Based Ring Oscillator}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/ringosc_pex_netlist.png}
+    \caption{Generated Netlist after Parasitic Extraction (PEX) for the 7-Stage Ring Oscillator}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/ringosc_test.png}
+    \caption{Test Schematic for Evaluating Post-Layout Transient Behaviour of the 7-Stage Ring Oscillator}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/ringosc_ideal_trans.png}
+    \caption{Transient Analysis of Pre-Layout 7-Stage Ring Oscillator with Propagation Delay}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/ringosc_ideal_rtft.png}
+    \caption{Rise-Time and Fall-Time Analysis of Pre-Layout 7-Stage Ring Oscillator}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/ringosc_pex_trans.png}
+    \caption{Transient Analysis of Post-Layout 7-Stage Ring Oscillator with Propagation Delay}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{exp4/ringosc_pex_rtft.png}
+    \caption{Rise-Time and Fall-Time Analysis of Post-Layout 7-Stage Ring Oscillator}
+\end{figure}
+\begin{table}[H]
+\centering
+\large
+\begin{tabular}{|l|c|c|c|}
+\hline
+ & Propagation Delay (ps) & Rise-Time (ps) & Fall-Time (ps)\\ \hline
+Pre-Layout  &  34.85 & 43.826 & 35.861  \\ \hline
+Post-Layout & 58.63 & 75.020 & 91.933 \\ \hline
+Delta       & 23.78 & 31.394 & 56.072 \\ \hline
+\end{tabular}
+\caption{Comparison of Pre-Layout and Post-Layout Timing Parameters for the 7-Stage Ring Oscillator}
+\end{table}
+\section*{Discussion and Conclusion}
+\subsection*{Discussion by Ninaad Desai (23EC30030)}
+In this experiment, we explored the subsequent stages towards chip fabrication after schematic circuit design, building upon our designs for the CMOS inverter and the 7-stage ring oscillator from experiments 1 and 2 respectively. We designed the layout of the circuits, which involves the accurate geometric and spatial representation of the circuit elements such as PMOS and NMOS transistors, and wires which connect various terminals of the devices. After designing the layout, it is paramount to verify if the designed layout can be fabricated by the specified technology node, in our case 180 nm, and if so, check whether functionality of the layout design resembles that of the schematic design for the same circuit. These verifications are performed using nanometer Design Rule Check (nmDRC) and nanometer Layout Versus Schematic check (nmLVS), respectively. However, these verifications only test the functionality and the correctness of the layout but do not account for changes in device parameters which cannot be predicted or modelled during schematic design. This includes coupling and parasitic impedences, which depend on the spacing of devices and which can be only determined post-layout design. Hence, Parasitic Extraction (PEX) is performed on the designed layout to generate a new netlist, which can be represented by an equivalent schematic. As a part of post-layout analysis, we compared the ideal schematic design and the PEX-adjusted schematic design and observed changes in important device parameters such as rise-time, fall-time and propagation delay. We utilized the software stack provided by Calibre for DRC, LVS and PEX.
+
+We faced multiple errors while performing DRC for the CMOS inverter. Firstly, our NMOS and PMOS transistors were laid out too close to each other, with separation lesser than that specified in the 180 nm techology ruleset. This was followed by errors in the spacing between the exposed polysilicon gate terminal and the source and drain terminals of the NMOS transistors. We later deduced that that the M1 metal gate-to-gate contact between the NMOS and the PMOS transistors, extended slightly beyond the gate terminal area, which violated the technology ruleset. Moreover, we faced issues with metal wire that shorted the drains of the two transistors, the \textit{VOUT} terminal, as it was very close to the \textit{VIN} terminal. This was also a consequence of using the M2 metal for the \textit{VOUT} wire and the inter-layer M2-M1 contact patch, which resulted in further issues do to inadequate overlap with either wire. We resolved this error by scrapping the M2 metal completely and extended the M1 metal wire for \textit{VOUT} away from the \textit{VIN} wire, as shown in the final schematic diagram for the CMOS inverter. 
+
+Another point to be noted is that our design for the 7-stage ring oscillator, in hindsight, is inefficient in terms of area. The wire labelled \textit{V0}, which connects the output pin of the rightmost inverter with the input pin of the leftmost inverter, is made of the same metal M1, and hence resides in the same layer as all other wires. However, this not only makes the \textit{V0} wire longer, but also, the overall circuit consumes a larger area. This also results in asymmetric timing properties. while all CMOS inverters are identical and the parasitic capacitances within each transistor affects all stages evenly, the metallic wires are disproportionate in terms of length, and hence in terms of their coupling capacitances. The \textit{V0} wire would obviously contribute to larger capacitance due to its larger area. This may explain the significant differences in the rise-time and the fall-time. A solution to the uneven wire length and the overall area of the circuit would be to eliminate the linear arrangement of the CMOS inverter, and instead use a heptagonal arrangement of CMOS inverters, making each consecutive pair of transistors almost equally spaced. Moreover, multiple metallic layers of different metals may be used to avoid intense parasitic effects and to minimize area by utilizing the height dimension. This is just a rough hypothesis. The functional and spatial correctness of the pposed solution must be investigated through DRC and LVS checks.
+
+\section*{Discussion by Rishith Susarla (23EC10068)}
+
+In this experiment, the primary objective was to bridge the gap between ideal schematic-level design and practical silicon implementation. While Experiments 1 and 2 focused on optimizing the inverter and analyzing the ring oscillator at the schematic level, this experiment emphasized the physical constraints and parasitic effects introduced during layout design. The transition from schematic to layout made it evident that circuit performance is not solely dependent on transistor sizing but also significantly influenced by interconnections and layout design.
+
+For the CMOS inverter, the pre-layout and post-layout comparison (Table 1) clearly demonstrates the impact of layout-induced parasitics. The propagation delay increased from 58.5 ps to 69.7 ps, indicating an increment of 11.2 ps. Similarly, both rise-time and fall-time increased by approximately 10.866 ps. This increase can be directly attributed to parasitic resistances and capacitances introduced by diffusion regions, metal interconnects, contacts, and coupling between adjacent wires. According to the RC delay approximation,
+\[
+t_{delay} \approx R_{eq} \times C_{load},
+\]
+even a small increase in effective capacitance results in measurable delay degradation. Despite these increases, the inverter maintained symmetric rise and fall times post-layout, indicating that the original transistor sizing strategy for equal pull-up and pull-down strength remained valid even after parasitic extraction.
+
+The impact of parasitics becomes more pronounced in the 7-stage ring oscillator. As shown in Table 2, the propagation delay increased significantly from 34.85 ps (pre-layout) to 58.63 ps (post-layout), a difference of 23.78 ps. The rise-time and fall-time experienced even larger deviations, particularly the fall-time, which increased by 56.072 ps. This substantial degradation highlights how interconnect parasitics accumulate across multiple stages. Since a ring oscillator consists of cascaded inverters, any delay increase per stage compounds to affect the overall oscillation frequency. Thus, the post-layout oscillation frequency is noticeably lower than the pre-layout estimate.
+
+One important observation is that in multi-stage circuits, interconnect routing plays a much more dominant role than in single-gate circuits. The long feedback connection between the last and first inverter introduces additional distributed RC effects, which disproportionately affect signal transitions. Unequal routing lengths also contribute to asymmetric loading conditions, leading to variations in rise and fall characteristics. This demonstrates that in practical VLSI design, layout symmetry and routing optimization are critical for high-speed circuits.
+
+This experiment also reinforced the importance of DRC and LVS verification. While DRC ensures manufacturability under the 180 nm process constraints, LVS guarantees electrical equivalence between schematic and layout. However, neither ensures performance preservation which is checked by PEX and post-layout simulation. Thus, functional correctness, manufacturability, and performance estimation are three distinct, interdependent verification stages.
+
+Overall, this experiment highlights that schematic-level optimization alone is insufficient for predicting real silicon behavior. Layout parastics influence delay and timing performance, especially in multi-stage circuits. Therefore, layout planing should be optimized accordingly for achieving optimum performance.
+
+\end{document}
